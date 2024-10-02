@@ -1,4 +1,5 @@
 # ![teste](https://www.xpand-it.com/wp-content/uploads/2020/06/Keycloak-logo.png)  
+
 Documentação do curso de Keycloak 
 
 ## Estrutura KeyCloak. 
@@ -14,6 +15,8 @@ Documentação do curso de Keycloak
 * Groups: Conjuntos de usuários que podem ser gerenciados em conjunto, facilitando a atribuição de roles.
 
 * Roles: Permissões que podem ser atribuídas a usuários ou grupos, definindo o que eles podem fazer dentro do client.
+
+![structure](https://github.com/FrankDestro/Imagens-Readme/blob/main/keycloak-structure.png)
 
 ## Roles e os tipos :
 
