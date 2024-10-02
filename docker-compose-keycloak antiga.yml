@@ -1,0 +1,71 @@
+version: '3.9'
+
+networks:
+  keycloak_network:
+    driver: bridge
+
+services:
+  # ====================================================================================================================
+  # POSTGRES SERVER
+  # ====================================================================================================================
+   postgres-docker:
+    image: postgres:latest
+    restart: unless-stopped
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_DB: keycloak_db
+      POSTGRES_PASSWORD: 1234567
+    ports:
+      - 5433:5432
+    volumes:
+      - data:/etc/postgresql/data
+      - ./init-schema.sql:/docker-entrypoint-initdb.d/init-schema.sql
+    networks:
+      - keycloak_network
+   # ====================================================================================================================
+   # KEYCLOAK
+   # ====================================================================================================================
+   keycloak:
+    image: quay.io/keycloak/keycloak:legacy
+    container_name: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres-docker
+      DB_DATABASE: keycloak_db
+      DB_USER: admin
+      DB_SCHEMA: keycloak_schema
+      DB_PASSWORD: 1234567
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    ports:
+      - "8080:8080"  # Exponha a porta 8083 para acesso externo
+    restart: always
+    depends_on:
+      - postgres-docker
+    networks:
+      - keycloak_network
+  # ====================================================================================================================
+  # PGADMIN
+  # ====================================================================================================================
+   pgadmin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    container_name: dev-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234567
+    ports:
+      - 5050:80
+    volumes:
+      - /home/Frank/IdeaProjects/SupportService-v3.0/back/docker/.data/pgadmin:/etc/pgadmin
+    depends_on:
+      - postgres-docker
+    networks:
+      - keycloak_network
+
+volumes:
+  data:
+    driver: local

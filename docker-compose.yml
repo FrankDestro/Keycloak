@@ -1,0 +1,78 @@
+version: '3.9'
+
+networks:
+  keycloak_network:
+    driver: bridge
+
+services:
+  # ====================================================================================================================
+  # POSTGRES SERVER
+  # ====================================================================================================================
+   postgres-docker:
+    image: postgres:latest
+    restart: unless-stopped
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_DB: keycloak_db
+      POSTGRES_PASSWORD: 1234567
+    ports:
+      - 5433:5432
+    volumes:
+      - data:/etc/postgresql/data
+      - ./init-schema.sql:/docker-entrypoint-initdb.d/init-schema.sql
+    networks:
+      - keycloak_network
+   # ====================================================================================================================
+   # KEYCLOAK
+   # ====================================================================================================================
+   keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: keycloak
+    command: start
+    environment:
+     - KC_DB=postgres
+     - KC_DB_URL_HOST=postgres-docker  # O nome do host do banco de dados
+     - KC_DB_URL_PORT=5432  # Porta padrão do PostgreSQL (caso não tenha mudado)
+     - KC_DB_URL_DATABASE=keycloak_db  # Nome do banco de dados
+     - KC_DB_USERNAME=admin  # Usuário do banco de dados
+     - KC_DB_PASSWORD=1234567  # Senha do banco de dados
+     - KC_DB_SCHEMA=keycloak_schema  # Esquema do banco de dados (opcional, se estiver usando um esquema específico)
+
+     - KEYCLOAK_ADMIN=admin  # Usuário admin do Keycloak
+     - KEYCLOAK_ADMIN_PASSWORD=admin  # Senha do admin do Keycloak
+
+     - KC_HTTP_ENABLED=true  # Habilita HTTP
+     - KC_HOSTNAME_STRICT=false  # Desativa a verificação estrita do hostname
+    volumes:
+     - keycloak_data:/opt/keycloak/data  # Volume para armazenar dados do Keycloak
+    ports:
+      - "8080:8080"  # Exponha a porta 8083 para acesso externo
+    restart: always
+    depends_on:
+      - postgres-docker
+    networks:
+      - keycloak_network
+  # ====================================================================================================================
+  # PGADMIN
+  # ====================================================================================================================
+   pgadmin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234567
+    ports:
+      - 5050:80
+    volumes:
+      - /home/Frank/IdeaProjects/SupportService-v3.0/back/docker/.data/pgadmin:/etc/pgadmin
+    depends_on:
+      - postgres-docker
+    networks:
+      - keycloak_network
+
+volumes:
+  data:
+    driver: local
+  keycloak_data:
