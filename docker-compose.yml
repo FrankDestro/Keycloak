@@ -11,7 +11,7 @@ services:
    postgres-docker:
     image: postgres:latest
     restart: unless-stopped
-    container_name: postgres
+    container_name: postgres-keycloak
     environment:
       POSTGRES_USER: admin
       POSTGRES_DB: keycloak_db
@@ -20,9 +20,11 @@ services:
       - 5433:5432
     volumes:
       - data:/etc/postgresql/data
-      - ./init-schema.sql:/docker-entrypoint-initdb.d/init-schema.sql
+      - ./init-schema.sql:/docker-entrypoint-initdb.d/init-schema.sql:z
     networks:
       - keycloak_network
+    profiles:
+      - database
    # ====================================================================================================================
    # KEYCLOAK
    # ====================================================================================================================
@@ -53,13 +55,15 @@ services:
       - postgres-docker
     networks:
       - keycloak_network
+    profiles:
+      - database
   # ====================================================================================================================
   # PGADMIN
   # ====================================================================================================================
    pgadmin:
     image: dpage/pgadmin4
     restart: unless-stopped
-    container_name: pgadmin
+    container_name: pgadmin-keycloak
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
       PGADMIN_DEFAULT_PASSWORD: 1234567
@@ -71,6 +75,8 @@ services:
       - postgres-docker
     networks:
       - keycloak_network
+    profiles:
+     - database
 
 volumes:
   data:
