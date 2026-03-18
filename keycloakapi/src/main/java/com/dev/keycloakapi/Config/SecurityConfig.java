@@ -29,7 +29,8 @@ public class SecurityConfig {
                     auth.requestMatchers("/auth/login/**").permitAll();
                     auth.requestMatchers("/auth/refresh/**").permitAll();
                     auth.requestMatchers("/resources/admin/**").hasAuthority("ROLE_ADMIN");
-                    auth.requestMatchers("/resources/operation/**").hasAuthority("ROLE_OPERATION");
+                    auth.requestMatchers("/resources/operation/**").hasAuthority("ROLE_USER");
+                    auth.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt

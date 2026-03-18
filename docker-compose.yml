@@ -1,14 +1,12 @@
-version: '3.9'
-
 networks:
-  keycloak_network:
+  microservice_network:
     driver: bridge
 
 services:
   # ====================================================================================================================
   # POSTGRES SERVER
   # ====================================================================================================================
-   postgres-docker:
+   postgres-docker-keycloak:
     image: postgres:latest
     restart: unless-stopped
     container_name: postgres-keycloak
@@ -17,14 +15,14 @@ services:
       POSTGRES_DB: keycloak_db
       POSTGRES_PASSWORD: 1234567
     ports:
-      - 5433:5432
+      - 5439:5432
     volumes:
       - data:/etc/postgresql/data
       - ./init-schema.sql:/docker-entrypoint-initdb.d/init-schema.sql:z
     networks:
-      - keycloak_network
+      - microservice_network
     profiles:
-      - database
+      - database-sql
    # ====================================================================================================================
    # KEYCLOAK
    # ====================================================================================================================
@@ -34,7 +32,7 @@ services:
     command: start
     environment:
      - KC_DB=postgres
-     - KC_DB_URL_HOST=postgres-docker  # O nome do host do banco de dados
+     - KC_DB_URL_HOST=postgres-docker-keycloak  # O nome do host do banco de dados
      - KC_DB_URL_PORT=5432  # Porta padrão do PostgreSQL (caso não tenha mudado)
      - KC_DB_URL_DATABASE=keycloak_db  # Nome do banco de dados
      - KC_DB_USERNAME=admin  # Usuário do banco de dados
@@ -51,12 +49,12 @@ services:
     ports:
       - "8080:8080"  # Exponha a porta 8083 para acesso externo
     restart: always
-    depends_on:
-      - postgres-docker
+#    depends_on:
+#      - postgres-docker-keycloak
     networks:
-      - keycloak_network
+      - microservice_network
     profiles:
-      - database
+      - keycloak
   # ====================================================================================================================
   # PGADMIN
   # ====================================================================================================================
@@ -74,9 +72,9 @@ services:
     depends_on:
       - postgres-docker
     networks:
-      - keycloak_network
+      - microservice_network
     profiles:
-     - database
+     - database-admin
 
 volumes:
   data:

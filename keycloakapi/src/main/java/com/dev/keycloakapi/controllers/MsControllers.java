@@ -16,7 +16,7 @@ public class MsControllers {
     }
 
     @GetMapping("/operation")
-    @PreAuthorize("hasAuthority('ROLE_OPERATION')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public String operationAccess(){
         return "Acesso concedido à OPERAÇÃO";
     }

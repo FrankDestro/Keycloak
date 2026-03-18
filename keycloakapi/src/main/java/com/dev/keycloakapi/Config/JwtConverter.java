@@ -15,7 +15,7 @@ public class JwtConverter {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
             List<String> roles = (List<String>) jwt.getClaimAsMap("realm_access").get("roles");
             return roles.stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                    .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
         });
         return jwtAuthenticationConverter;
