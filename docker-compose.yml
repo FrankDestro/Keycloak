@@ -29,7 +29,7 @@ services:
    keycloak:
     image: quay.io/keycloak/keycloak:25.0
     container_name: keycloak
-    command: start
+    command: start-dev
     environment:
      - KC_DB=postgres
      - KC_DB_URL_HOST=postgres-docker-keycloak  # O nome do host do banco de dados
@@ -44,8 +44,12 @@ services:
 
      - KC_HTTP_ENABLED=true  # Habilita HTTP
      - KC_HOSTNAME_STRICT=false  # Desativa a verificação estrita do hostname
+
+     - KC_SPI_THEME_CACHE_THEMES=false
+     - KC_SPI_THEME_CACHE_TEMPLATES=false
     volumes:
-     - keycloak_data:/opt/keycloak/data  # Volume para armazenar dados do Keycloak
+      - keycloak_data:/opt/keycloak/data
+      - ./keycloak-providers/keycloak-theme-for-kc-22-to-25.jar:/opt/keycloak/providers/keycloak-theme-for-kc-22-to-25.jar
     ports:
       - "8080:8080"  # Exponha a porta 8083 para acesso externo
     restart: always
@@ -80,3 +84,7 @@ volumes:
   data:
     driver: local
   keycloak_data:
+
+
+#TELA DE LOGIN PADRÃO KEYCLOAK
+#  http://localhost:8080/realms/REALM_SPRING_API/protocol/openid-connect/auth?client_id=account&response_type=code
